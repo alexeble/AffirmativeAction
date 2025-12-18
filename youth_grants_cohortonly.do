@@ -5,6 +5,156 @@
 * Edited by Alex 2025-06-27. Works.
  
  */
+
+ 
+/*
+
+Transforming the data:
+
+- Collapse into person level
+
+collapse (all variables) by personid
+plot
+regress 
+
+	coeflabels(years_n10="-10" years_n9=" " years_n8=" " years_n7=" " years_n6=" " years_n5="-5" years_n4=" " ///
+		years_n3=" " years_n2=" " year_cutoff=" " years_p0="0" years_p1=" " years_p2=" " years_p3=" " years_p4=" " ///
+		years_p5="5" years_p6=" " years_p7=" " years_p8=" " years_p9=" " years_p10="10") ///
+
+			yline(0, lcolor(red%50)) ///
+	xline(10.5, lpattern(solid) lcolor(blue%50)) ///	
+	ylabel(-0.05(0.05)0.1,labsize(4)) ///
+
+Current thought: drop the figure, do just the table. 
+
+*/
+
+
+/* ---------------------------------------------------- */
+/*         youth grants: cohorts [1966, 1975]           */
+/*                        table                         */
+/* ---------------------------------------------------- */
+
+use "$data_path/grants_researcher_year_66_75.dta", clear
+
+collapse youth_grant_ry author_birthyr female treat_female top_scholar3 top_scholar1, by(author_numid2)
+
+
+local cond1 author_birthyr >= 1966 & author_birthyr <= 1975
+local cond4 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 1
+local cond5 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 0 
+local cond6 (author_birthyr >= 1966 & author_birthyr <= 1975) & (wkunit_type == 1 | wkunit_type == 2) 
+local cond7 (author_birthyr >= 1966 & author_birthyr <= 1975) & wkunit_type == 4 
+local controls treat_female treat_post post_female 
+
+forvalues i = 1/7 {
+	
+	reghdfe youth_grant_ry treat_female_post `controls' if `cond`i'', absorb(author_numid2 year) vce(cluster author_numid2) 
+	
+	* Saving the parameter estimates
+    local te_`i' = _b[treat_female_post]
+    local se_`i' = _se[treat_female_post]
+	
+    * Generating t-stats
+    local tstat_`i' = abs(_b[treat_female_post]/_se[treat_female_post])		
+
+    * no of obs
+    local n_`i': di %9.0fc e(N)	
+	
+    * R-sq
+    local rsq_`i': di %9.3f e(r2)	
+	
+	* Outcome mean
+	sum youth_grant_ry if `cond`i''
+	local mean_`i': di %9.4f r(mean)	
+	
+}
+
+forvalues i = 1/7 {
+	
+	* Generating stars for significance
+    if `tstat_`i'' >= 1.64 local st_`i' = "*"
+    if `tstat_`i'' >= 1.96 local st_`i' = "**"
+    if `tstat_`i'' >= 2.33 local st_`i' = "***"
+	
+    * Formatting the parameters (making them the same number of significant figures and pretty for the table)
+    local te_`i': di %9.3f `te_`i''
+    local se_`i': di %9.3f `se_`i''
+	
+    * Dropping the hanging space that this code generates so I can use parentheses around the parameter without it appearing like "(x.xxx )"
+    local se_`i' = subinstr("`se_`i''"," ","",.)			
+	
+}	
+
+local tex_te "$\beta_{1}$: policy effect"
+local tex_se ""
+local tex_mean "\textit{Outcome mean}"
+local tex_obs "\textit{N}"
+
+forvalues i = 1/7 {
+	
+    local tex_te = "`tex_te' & `te_`i''`st_`i''"
+    local tex_se = "`tex_se' & (`se_`i'')"
+    local tex_mean = "`tex_mean' & `mean_`i''"
+    local tex_obs = "`tex_obs' & `n_`i''"	
+	
+}
+
+texdoc init "$table_path/Tab_youth_grants.tex", replace force
+
+tex \begin{tabular}{lccccccc}
+tex \hline \hline
+tex & \multicolumn{1}{c}{Full} & \multicolumn{2}{c}{Proportion female} & \multicolumn{2}{c}{Baseline productivity} & \multicolumn{2}{c}{Prestige of home} \\
+tex & \multicolumn{1}{c}{sample} & \multicolumn{2}{c}{in field} & \multicolumn{2}{c}{of scientist} & \multicolumn{2}{c}{institution}
+tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
+tex & & Higher & Lower & Higher & Lower & Elite & Other \\
+tex \hline
+tex & & & & & & & \\
+tex `tex_te' \\
+tex `tex_se' \\
+tex & & & & & & & \\
+tex `tex_mean' \\
+tex `tex_obs' \\
+tex \hline \hline
+tex \end{tabular}
+
+texdoc close 
+
+ 
+ 
+ *****
+ 
+use "$data_path/grants_researcher_year_66_75.dta", clear
+
+collapse youth_grant_ry author_birthyr female treat_female, by(author_numid2)
+
+local treatlist1 i.female#i.author_birthyr
+local cond1 author_birthyr >= 1966 & author_birthyr <= 1975
+
+reghdfe youth_grant_ry i.author_birthyr##i.female if `cond1'
+margins author_birthyr#female
+marginsplot, noci recast(scatter) ///
+    xtitle("Birth cohort") ytitle("Predicted probability")
+
+reghdfe youth_grant_ry `treatlist1' if `cond1' 
+est store grant1
+
+mat list e(b)
+
+coefplot (grant1, msymbol(O) mcolor(gs0) lcolor(gs0) ///
+    ciopts(recast(rcap) lcolor(gs0) lpattern(solid))) ///
+    , keep(1.female#*.author_birthyr) ///
+	coeflabels(1.female#1966.bauthor_birthyr="1966" 1.female#1967.author_birthyr="" 1.female#1968.author_birthyr="" 1.female#1969.author_birthyr="" 1.female#1970.author_birthyr="" 1.female#1971.author_birthyr="1971" 1.female#1972.author_birthyr="1972" 1.female#1973.author_birthyr="1973" 1.female#1974.author_birthyr="1974" 1.female#1975.author_birthyr="1975" ) ///
+    vertical omitted legend(off) ///
+      xlabel(, labsize(4)) ///
+      xtitle("Birth cohort", size(4)) ///
+      ytitle("Won the young scientist grant", size(4))
+	  
+
+graph export "$figure_path/Fig_young_grant_1966_1975.eps", replace
+graph export "$figure_path/Fig_young_grant_1966_1975.pdf", replace	
+
+ 
  
 /* ---------------------------------------------------- */
 /*         youth grants: cohorts [1966, 1975]           */

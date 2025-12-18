@@ -399,6 +399,7 @@ tex \begin{tabular}{lccccc}
 tex \hline \hline
 tex & \multicolumn{2}{c}{Sample} & \multicolumn{3}{c}{Young scientist grant awardees}
 tex & \cmidrule(lr){2-3} \cmidrule(lr){4-6}
+tex & (1) & (2) & (3) & (4) & (5) \\
 tex & CNKI scholars & Analysis sample & All & CNKI scholars & Analysis sample \\
 tex \hline
 tex & & & & &  \\

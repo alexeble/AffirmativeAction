@@ -6,6 +6,17 @@ career outcomes: overall effects
 
 */
 
+* P-value for nature:
+
+
+use "$data_path/grants_researcher_year_66_75.dta", clear
+
+local cond1 author_birthyr >= 1966 & author_birthyr <= 1975 & yr_diff >= -5
+local controls treat_female treat_post post_female 
+
+reghdfe  full_prof treat_female_post `controls' if `cond1', absorb(author_numid2 year) vce(cluster author_numid2) 
+		
+
 /* ---------------------------------------------------- */
 /*           promotion: cohorts [1966, 1975]            */
 /*                  sample selection                    */
@@ -247,17 +258,15 @@ graph export "$figure_path/Fig_promotion_assoc_prof2_1966_1975.pdf", replace
 use "$data_path/grants_researcher_year_66_75.dta", clear
 
 local cond1 author_birthyr >= 1966 & author_birthyr <= 1975 & yr_diff >= -5
-local cond2 `cond1' & (nsfc_field0 == 2 | nsfc_field0 == 3 | nsfc_field0 == 8) 
-local cond3 `cond1' & (nsfc_field0 == 1 | nsfc_field0 == 4 | nsfc_field0 == 5 | nsfc_field0 == 6)
-local cond4 `cond1' & top_scholar3 == 1
-local cond5 `cond1' & top_scholar3 == 0 
-local cond6 `cond1' & (wkunit_type == 1 | wkunit_type == 2) 
-local cond7 `cond1' & wkunit_type == 4 
+local cond2 `cond1' & top_scholar3 == 1
+local cond3 `cond1' & top_scholar3 == 0 
+local cond4 `cond1' & top_scholar1 == 1
+local cond5 `cond1' & top_scholar1 == 0 
 local controls treat_female treat_post post_female 
 
 local varlist assoc_prof full_prof
 foreach i in `varlist' { // outcome variables
-	forvalues j = 1/7 { // samples
+	forvalues j = 1/5 { // samples
 		
 		reghdfe `i' treat_female_post `controls' if `cond`j'', absorb(author_numid2 year) vce(cluster author_numid2) 
 		
@@ -282,7 +291,7 @@ foreach i in `varlist' { // outcome variables
 }
 
 foreach i in `varlist' { // outcome variables
-	forvalues j = 1/7 { // samples
+	forvalues j = 1/5 { // samples
 	
 		* Generating stars for significance
 		if `tstat_`i'_`j'' >= 1.64 local st_`i'_`j' = "*"
@@ -309,7 +318,7 @@ foreach i in `varlist' { // outcome variables
 }
 
 foreach i in `varlist' { // outcome variables
-	forvalues j = 1/7 {
+	forvalues j = 1/5 {
 		
 		local tex_te_`i' = "`tex_te_`i'' & `te_`i'_`j''`st_`i'_`j''"
 		local tex_se_`i' = "`tex_se_`i'' & (`se_`i'_`j'')"
@@ -321,29 +330,31 @@ foreach i in `varlist' { // outcome variables
 
 texdoc init "$table_path/Tab_promotion_assoc_full_prof.tex", replace force
 
-tex \begin{tabular}{lccccccc}
+tex \begin{tabular}{lccccc}
 tex \hline \hline
-tex & \multicolumn{1}{c}{Full} & \multicolumn{2}{c}{Proportion female} & \multicolumn{2}{c}{Baseline productivity} & \multicolumn{2}{c}{Prestige of home} \\
-tex & \multicolumn{1}{c}{sample} & \multicolumn{2}{c}{in field} & \multicolumn{2}{c}{of scientist} & \multicolumn{2}{c}{institution}
-tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
-tex & & Higher & Lower & Higher & Lower & Elite & Other \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Published in} & \multicolumn{2}{c}{Published in} \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{any journal} & \multicolumn{2}{c}{top journal} \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{prior to policy} & \multicolumn{2}{c}{prior to policy} 
+tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} 
+tex & (1)  & (2)  & (3)  & (4)  & (5) \\
+tex & Full sample & Yes & No  & Yes & No \\
 tex \hline
-tex & & & & & & & \\
-tex \multicolumn{7}{c}{\textbf{Panel A: Promotion to associate professor}} \\
-tex & & & & & & & \\
+tex & & & & & \\
+tex \multicolumn{6}{c}{\textbf{Panel A: Promotion to associate professor}} \\
+tex & & & & & \\
 tex `tex_te_assoc_prof' \\
 tex `tex_se_assoc_prof' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_mean_assoc_prof' \\
 tex `tex_obs_assoc_prof' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex \hline
-tex & & & & & & & \\
-tex \multicolumn{7}{c}{\textbf{Panel B: Promotion to full professor}} \\
-tex & & & & & & & \\
+tex & & & & & \\
+tex \multicolumn{6}{c}{\textbf{Panel B: Promotion to full professor}} \\
+tex & & & & & \\
 tex `tex_te_full_prof' \\
 tex `tex_se_full_prof' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_mean_full_prof' \\
 tex `tex_obs_full_prof' \\
 tex \hline \hline
@@ -361,17 +372,15 @@ texdoc close
 use "$data_path/grants_researcher_year_66_75.dta", clear
 
 local cond1 author_birthyr >= 1966 & author_birthyr <= 1975
-local cond2 `cond1' & (nsfc_field0 == 2 | nsfc_field0 == 3 | nsfc_field0 == 8) 
-local cond3 `cond1' & (nsfc_field0 == 1 | nsfc_field0 == 4 | nsfc_field0 == 5 | nsfc_field0 == 6)
-local cond4 `cond1' & top_scholar3 == 1
-local cond5 `cond1' & top_scholar3 == 0 
-local cond6 `cond1' & (wkunit_type == 1 | wkunit_type == 2) 
-local cond7 `cond1' & wkunit_type == 4 
+local cond2 `cond1' & top_scholar3 == 1
+local cond3 `cond1' & top_scholar3 == 0 
+local cond4 `cond1' & top_scholar1 == 1
+local cond5 `cond1' & top_scholar1 == 0 
 local controls treat_female treat_post post_female 
 
 local varlist assoc_prof full_prof
 foreach i in `varlist' { // outcome variables
-	forvalues j = 1/7 { // samples
+	forvalues j = 1/5 { // samples
 		
 		reghdfe `i' treat_female_post `controls' if `cond`j'', absorb(author_numid2 year) vce(cluster author_numid2) 
 		
@@ -396,7 +405,7 @@ foreach i in `varlist' { // outcome variables
 }
 
 foreach i in `varlist' { // outcome variables
-	forvalues j = 1/7 { // samples
+	forvalues j = 1/5 { // samples
 	
 		* Generating stars for significance
 		if `tstat_`i'_`j'' >= 1.64 local st_`i'_`j' = "*"
@@ -423,7 +432,7 @@ foreach i in `varlist' { // outcome variables
 }
 
 foreach i in `varlist' { // outcome variables
-	forvalues j = 1/7 {
+	forvalues j = 1/5 {
 		
 		local tex_te_`i' = "`tex_te_`i'' & `te_`i'_`j''`st_`i'_`j''"
 		local tex_se_`i' = "`tex_se_`i'' & (`se_`i'_`j'')"
@@ -435,35 +444,39 @@ foreach i in `varlist' { // outcome variables
 
 texdoc init "$table_path/Tab_promotion_assoc_full_prof_20y.tex", replace force
 
-tex \begin{tabular}{lccccccc}
+
+tex \begin{tabular}{lccccc}
 tex \hline \hline
-tex & \multicolumn{1}{c}{Full} & \multicolumn{2}{c}{Proportion female} & \multicolumn{2}{c}{Baseline productivity} & \multicolumn{2}{c}{Prestige of home} \\
-tex & \multicolumn{1}{c}{sample} & \multicolumn{2}{c}{in field} & \multicolumn{2}{c}{of scientist} & \multicolumn{2}{c}{institution}
-tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
-tex & & Higher & Lower & Higher & Lower & Elite & Other \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Published in} & \multicolumn{2}{c}{Published in} \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{any journal} & \multicolumn{2}{c}{top journal} \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{prior to policy} & \multicolumn{2}{c}{prior to policy} 
+tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} 
+tex & (1)  & (2)  & (3)  & (4)  & (5) \\
+tex & Full sample & Yes & No  & Yes & No \\
 tex \hline
-tex & & & & & & & \\
-tex \multicolumn{7}{c}{\textbf{Panel A: Promotion to associate professor}} \\
-tex & & & & & & & \\
+tex & & & & & \\
+tex \multicolumn{6}{c}{\textbf{Panel A: Promotion to associate professor}} \\
+tex & & & & & \\
 tex `tex_te_assoc_prof' \\
 tex `tex_se_assoc_prof' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_mean_assoc_prof' \\
 tex `tex_obs_assoc_prof' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex \hline
-tex & & & & & & & \\
-tex \multicolumn{7}{c}{\textbf{Panel B: Promotion to full professor}} \\
-tex & & & & & & & \\
+tex & & & & & \\
+tex \multicolumn{6}{c}{\textbf{Panel B: Promotion to full professor}} \\
+tex & & & & & \\
 tex `tex_te_full_prof' \\
 tex `tex_se_full_prof' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_mean_full_prof' \\
 tex `tex_obs_full_prof' \\
 tex \hline \hline
 tex \end{tabular}
 
 texdoc close
+
 
 /* ---------------------------------------------------- */
 /*      associate professor: cohorts [1966, 1975]       */

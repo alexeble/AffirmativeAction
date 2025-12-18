@@ -343,8 +343,8 @@ tex \begin{tabular}{lcccccc}
 tex \hline \hline
 tex & \multicolumn{3}{c}{Female} & \multicolumn{3}{c}{Male}
 tex & \cmidrule(lr){2-4} \cmidrule(lr){5-7}
-tex & Younger & Older & Difference & Younger & Older & Difference \\
 tex & (1) & (2) & (1)-(2) & (3) & (4) & (3)-(4) \\
+tex & Younger & Older & Difference & Younger & Older & Difference \\
 tex \hline
 tex & & & & & & \\
 tex \textbf{Field} & & & & & & \\

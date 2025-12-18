@@ -176,13 +176,53 @@ coefplot (grant1, msymbol(O) mcolor(gs0) lcolor(gs0) ciopts(recast(rcap) lcolor(
 		years_n3=" " years_n2=" " year_cutoff=" " years_p0="0" years_p1=" " years_p2=" " years_p3=" " years_p4=" " ///
 		years_p5="5" years_p6=" " years_p7=" " years_p8=" " years_p9=" " years_p10="10") ///
 	omitted ///
-	legend(order(2 "High-performing scholars" 4 "Lower-performing scholars") pos(6) region(lw(0)) cols(2) symxsize(*1.5) size(4)) ///
+	legend(order(2 "Has publication pre-policy" 4 "Others") pos(6) region(lw(0)) cols(2) symxsize(*1.5) size(4)) ///
 	xlabel(,labsize(4)) ///
 	ylabel(-0.1(0.05)0.05, labsize(4)) ///
 	xtitle("Years relative to policy start (2011)", size(4)) ///
 	ytitle("Won a general grant", size(4))
 
 graph export "$figure_path/Fig_general_grant_1966_1975_ability_het.eps", replace
+graph export "$figure_path/Fig_general_grant_1966_1975_ability_het.pdf", replace	
+
+
+/* ---------------------------------------------------- */
+/*        general grants: cohorts [1966, 1975]          */
+/*        high- vs. Lower-performing scholars           */
+/*        top journals						            */
+/* ---------------------------------------------------- */
+
+use "$data_path/grants_researcher_year_66_75.dta", clear
+
+local treatlist1 years_n10 years_n9 years_n8 years_n7 years_n6 years_n5 years_n4 years_n3 years_n2 year_cutoff years_p0 ///
+  years_p1 years_p2 years_p3 years_p4 years_p5 years_p6 years_p7 years_p8 years_p9 years_p10 
+local cond1 author_birthyr >= 1966 & author_birthyr <= 1975
+local cond2_1 top_scholar1 == 1
+local cond2_2 top_scholar1 == 0 
+local controls treat_female i.female#i.year i.treated#i.year
+
+reghdfe gen_grant_ry `treatlist1' `controls' if `cond1' & `cond2_1', absorb(author_numid2 year) vce(cluster author_numid2) 
+est store grant1
+reghdfe gen_grant_ry `treatlist1' `controls' if `cond1' & `cond2_2', absorb(author_numid2 year) vce(cluster author_numid2) 
+est store grant2
+
+coefplot (grant1, msymbol(O) mcolor(gs0) lcolor(gs0) ciopts(recast(rcap) lcolor(gs0) lpattern(solid)) offset(-0.1)) ///
+	(grant2, msymbol(Th) mcolor(gs8) lcolor(gs8) ciopts(recast(rcap) lcolor(gs8) lpattern(dash)) offset(0.1)), ///
+	keep(`treatlist1') ///
+	vertical ///
+	yline(0, lcolor(red%50)) ///
+	xline(10.5, lpattern(solid) lcolor(blue%50)) ///	
+	coeflabels(years_n10="-10" years_n9=" " years_n8=" " years_n7=" " years_n6=" " years_n5="-5" years_n4=" " ///
+		years_n3=" " years_n2=" " year_cutoff=" " years_p0="0" years_p1=" " years_p2=" " years_p3=" " years_p4=" " ///
+		years_p5="5" years_p6=" " years_p7=" " years_p8=" " years_p9=" " years_p10="10") ///
+	omitted ///
+	legend(order(2 "Has top publication pre-policy" 4 "Others") pos(6) region(lw(0)) cols(2) symxsize(*1.5) size(4)) ///
+	xlabel(,labsize(4)) ///
+	ylabel(-0.1(0.05)0.05, labsize(4)) ///
+	xtitle("Years relative to policy start (2011)", size(4)) ///
+	ytitle("Won a general grant", size(4))
+
+graph export "$figure_path/Fig_general_grant_1966_1975_ability_hettoppub.eps", replace
 graph export "$figure_path/Fig_general_grant_1966_1975_ability_het.pdf", replace	
 
 
@@ -415,15 +455,13 @@ texdoc close
 use "$data_path/grants_researcher_year_66_75.dta", clear
 
 local cond1 author_birthyr >= 1966 & author_birthyr <= 1975
-local cond2 (author_birthyr >= 1966 & author_birthyr <= 1975) & (nsfc_field0 == 2 | nsfc_field0 == 3 | nsfc_field0 == 8) 
-local cond3 (author_birthyr >= 1966 & author_birthyr <= 1975) & (nsfc_field0 == 1 | nsfc_field0 == 4 | nsfc_field0 == 5 | nsfc_field0 == 6)
-local cond4 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 1
-local cond5 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 0 
-local cond6 (author_birthyr >= 1966 & author_birthyr <= 1975) & (wkunit_type == 1 | wkunit_type == 2) 
-local cond7 (author_birthyr >= 1966 & author_birthyr <= 1975) & wkunit_type == 4 
+local cond2 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 1
+local cond3 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 0 
+local cond4 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar1 == 1
+local cond5 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar1 == 0 
 local controls treat_female treat_post1 treat_post2 post1_female post2_female 
 
-forvalues i = 1/7 {
+forvalues i = 1/5 {
 	
 	reghdfe gen_grant_ry treat_female_post1 treat_female_post2 `controls' if `cond`i'', absorb(author_numid2 year) vce(cluster author_numid2) 
 	
@@ -449,7 +487,7 @@ forvalues i = 1/7 {
 	
 }
 
-forvalues i = 1/7 {
+forvalues i = 1/5 {
 	
 	* Generating stars for significance
     if `tstat1_`i'' >= 1.64 local st1_`i' = "*"
@@ -478,7 +516,7 @@ local tex_se2 ""
 local tex_mean "\textit{Outcome mean}"
 local tex_obs "\textit{N}"
 
-forvalues i = 1/7 {
+forvalues i = 1/5 {
 	
     local tex_te1 = "`tex_te1' & `te1_`i''`st1_`i''"
     local tex_se1 = "`tex_se1' & (`se1_`i'')"
@@ -491,20 +529,23 @@ forvalues i = 1/7 {
 
 texdoc init "$table_path/Tab_general_grants2.tex", replace force
 
-tex \begin{tabular}{lccccccc}
+tex \begin{tabular}{lccccc}
 tex \hline \hline
-tex & \multicolumn{1}{c}{Full} & \multicolumn{2}{c}{Proportion female} & \multicolumn{2}{c}{Baseline productivity} & \multicolumn{2}{c}{Prestige of home} \\
-tex & \multicolumn{1}{c}{sample} & \multicolumn{2}{c}{in field} & \multicolumn{2}{c}{of scientist} & \multicolumn{2}{c}{institution}
-tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
-tex & & Higher & Lower & Higher & Lower & Elite & Other \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Published in} & \multicolumn{2}{c}{Published in} \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{any journal} & \multicolumn{2}{c}{top journal} \\
+
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{prior to policy} & \multicolumn{2}{c}{prior to policy} 
+tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} 
+tex & (1)  & (2)  & (3)  & (4)  & (5) \\
+tex & Full sample & Yes & No  & Yes & No \\
 tex \hline
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_te1' \\
 tex `tex_se1' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_te2' \\
 tex `tex_se2' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_mean' \\
 tex `tex_obs' \\
 tex \hline \hline

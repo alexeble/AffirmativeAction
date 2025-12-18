@@ -33,15 +33,6 @@ unique author_numid2 if author_birthyr >= 1961 & author_birthyr <= 1981 & female
 unique author_numid2 if author_birthyr >= 1966 & author_birthyr <= 1975 & female == 1  // female [1966, 1975]: 16,029 obs
 unique author_numid2 if author_birthyr >= 1970 & author_birthyr <= 1971 & female == 1  // female [1970, 1971]: 3,136 obs
 
-* selection of journals with detailed author info
-
-use "$raw_data_path/journals.dta", clear
-
-local varlist if_fh if_zh core_journal start_year n_issues
-foreach var in `varlist' {
-	ttest `var', by(author_info)
-}
-
 * number of obs from admin data on NSFC grant awardees and participants
 
 use "$raw_data_path/perinfo_nsfc.dta", clear

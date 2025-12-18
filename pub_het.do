@@ -180,10 +180,10 @@ use "$data_path/psInfo_scopus_pubs_yr_66_75.dta", clear
 
 local cond1 author_birthyr >= 1966 & author_birthyr <= 1975 & top_scholar3 == 1 
 local cond2 author_birthyr >= 1966 & author_birthyr <= 1975 & top_scholar3 == 0 
-local cond3 author_birthyr >= 1966 & author_birthyr <= 1975 & (wkunit_type == 1 | wkunit_type == 2) 
-local cond4 author_birthyr >= 1966 & author_birthyr <= 1975 & wkunit_type == 4 
+local cond3 author_birthyr >= 1966 & author_birthyr <= 1975 & top_scholar1 == 1 
+local cond4 author_birthyr >= 1966 & author_birthyr <= 1975 & top_scholar1 == 0 
 local controls treat_female treat_post post_female 
-local varlist n_jpapers_yr n_jpapers1_yr n_jpapers9_yr n_jcite_yr n_jpapers25_yr avg_author_jcount_yr
+local varlist n_jpapers_yr n_jpapers1_yr n_jpapers9_yr n_jpapers25_yr n_jcite_yr /*avg_author_jcount_yr*/
 
 forvalues j = 1/4 {
 	foreach i in `varlist' {
@@ -249,33 +249,34 @@ texdoc init "$table_path/Tab_pub_poisson_het.tex", replace force
 
 tex \begin{tabular}{lccccc}
 tex \hline \hline
-tex & Number of 	& Number of first- 	& Number of last- 	& Number of 	& Number of \\
-tex & total 		& authored 			& authored 			& citations 	& top \\
-tex & publications 	& publications 		& publications 		& 				& publications 
+tex & (1)  			& (2)  				& (3)  				& (4)  			& (5) \\
+tex & Number of 	& Number of first- 	& Number of last- 	& Number of 	& Number \\
+tex & total 		& authored 			& authored 			& top		 	& of \\
+tex & publications 	& publications 		& publications 		& publications	& citations \\
 tex \hline
 tex & & & & & \\
-tex \textbf{Panel A: Higher-performing scholars} & & & & & \\
+tex \multicolumn{6}{l}{\textbf{Panel A:Has at Least One Indexed Publication Pre-policy}} \\
 tex `tex_te_1' \\
 tex `tex_se_1' \\
 tex & & & & & \\
 tex `tex_mean_1' \\
 tex `tex_obs_1' \\
 tex & & & & & \\
-tex \textbf{Panel B: Lower-performing scholars} & & & & & \\
+tex \multicolumn{6}{l}{\textbf{Panel B: No Indexed Publications Pre-Policy}} \\
 tex `tex_te_2' \\
 tex `tex_se_2' \\
 tex & & & & & \\
 tex `tex_mean_2' \\
 tex `tex_obs_2' \\
 tex & & & & & \\
-tex \textbf{Panel C: Scholars from elite universities} & & & & & \\
+tex \multicolumn{6}{l}{\textbf{Panel C:Has at Least One Top Publication Pre-policy}} \\
 tex `tex_te_3' \\
 tex `tex_se_3' \\
 tex & & & & & \\
 tex `tex_mean_3' \\
 tex `tex_obs_3' \\
 tex & & & & & \\
-tex \textbf{Panel D: Scholars from other universities} & & & & & \\
+tex \multicolumn{6}{l}{\textbf{Panel D: No Top Publications Pre-Policy}} \\
 tex `tex_te_4' \\
 tex `tex_se_4' \\
 tex & & & & & \\
@@ -366,34 +367,33 @@ tex & total 		& authored 			& authored 			& citations 	& top \\
 tex & publications 	& publications 		& publications 		& 				& publications 
 tex \hline
 tex & & & & & \\
-tex \textbf{Panel A: Higher-performing scholars} & & & & & \\
+tex \multicolumn{6}{c}{\textbf{Panel A: Higher-performing scholars}} \\
 tex `tex_te_1' \\
 tex `tex_se_1' \\
 tex & & & & & \\
 tex `tex_mean_1' \\
 tex `tex_obs_1' \\
 tex & & & & & \\
-tex \textbf{Panel B: Lower-performing scholars} & & & & & \\
+tex \multicolumn{6}{c}{\textbf{Panel B: Lower-performing scholars}} \\
 tex `tex_te_2' \\
 tex `tex_se_2' \\
 tex & & & & & \\
 tex `tex_mean_2' \\
 tex `tex_obs_2' \\
 tex & & & & & \\
-tex \textbf{Panel C: Scholars from elite universities} & & & & & \\
+tex \multicolumn{6}{c}{Panel C: Scholars from elite universities}} \\
 tex `tex_te_3' \\
 tex `tex_se_3' \\
 tex & & & & & \\
 tex `tex_mean_3' \\
 tex `tex_obs_3' \\
 tex & & & & & \\
-tex \textbf{Panel D: Scholars from other universities} & & & & & \\
+tex \multicolumn{6}{c}{\textbf{Panel D: Scholars from other universities}} \\
 tex `tex_te_4' \\
 tex `tex_se_4' \\
 tex & & & & & \\
 tex `tex_mean_4' \\
 tex `tex_obs_4' \\
-tex & & & & & \\
 tex \hline \hline
 tex \end{tabular}
 

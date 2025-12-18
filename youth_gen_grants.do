@@ -491,15 +491,13 @@ texdoc close
 use "$data_path/grants_researcher_year_66_75.dta", clear
 
 local cond1 author_birthyr >= 1966 & author_birthyr <= 1975
-local cond2 (author_birthyr >= 1966 & author_birthyr <= 1975) & (nsfc_field0 == 2 | nsfc_field0 == 3 | nsfc_field0 == 8) 
-local cond3 (author_birthyr >= 1966 & author_birthyr <= 1975) & (nsfc_field0 == 1 | nsfc_field0 == 4 | nsfc_field0 == 5 | nsfc_field0 == 6)
-local cond4 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 1
-local cond5 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 0 
-local cond6 (author_birthyr >= 1966 & author_birthyr <= 1975) & (wkunit_type == 1 | wkunit_type == 2) 
-local cond7 (author_birthyr >= 1966 & author_birthyr <= 1975) & wkunit_type == 4 
+local cond2 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 1
+local cond3 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar3 == 0 
+local cond4 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar1 == 1
+local cond5 (author_birthyr >= 1966 & author_birthyr <= 1975) & top_scholar1 == 0 
 local controls treat_female treat_post post_female 
 
-forvalues i = 1/7 {
+forvalues i = 1/5 {
 	
 	reghdfe youth_gen_grant_ry treat_female_post `controls' if `cond`i'', absorb(author_numid2 year) vce(cluster author_numid2) 
 	
@@ -522,7 +520,7 @@ forvalues i = 1/7 {
 	
 }
 
-forvalues i = 1/7 {
+forvalues i = 1/5 {
 	
 	* Generating stars for significance
     if `tstat_`i'' >= 1.64 local st_`i' = "*"
@@ -543,7 +541,7 @@ local tex_se ""
 local tex_mean "\textit{Outcome mean}"
 local tex_obs "\textit{N}"
 
-forvalues i = 1/7 {
+forvalues i = 1/5 {
 	
     local tex_te = "`tex_te' & `te_`i''`st_`i''"
     local tex_se = "`tex_se' & (`se_`i'')"
@@ -554,17 +552,19 @@ forvalues i = 1/7 {
 
 texdoc init "$table_path/Tab_overall_num_grants.tex", replace force
 
-tex \begin{tabular}{lccccccc}
+tex \begin{tabular}{lccccc}
 tex \hline \hline
-tex & \multicolumn{1}{c}{Full} & \multicolumn{2}{c}{Proportion female} & \multicolumn{2}{c}{Baseline productivity} & \multicolumn{2}{c}{Prestige of home} \\
-tex & \multicolumn{1}{c}{sample} & \multicolumn{2}{c}{in field} & \multicolumn{2}{c}{of scientist} & \multicolumn{2}{c}{institution}
-tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
-tex & & Higher & Lower & Higher & Lower & Elite & Other \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{Published in} & \multicolumn{2}{c}{Published in} \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{any journal} & \multicolumn{2}{c}{top journal} \\
+tex & \multicolumn{1}{c}{} & \multicolumn{2}{c}{prior to policy} & \multicolumn{2}{c}{prior to policy} 
+tex & \cmidrule(lr){3-4} \cmidrule(lr){5-6} 
+tex & (1)  & (2)  & (3)  & (4)  & (5) \\
+tex & Full sample & Yes & No  & Yes & No \\
 tex \hline
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_te' \\
 tex `tex_se' \\
-tex & & & & & & & \\
+tex & & & & & \\
 tex `tex_mean' \\
 tex `tex_obs' \\
 tex \hline \hline

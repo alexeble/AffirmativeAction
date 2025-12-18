@@ -716,9 +716,10 @@ texdoc init "$table_path/Tab_pub_poisson.tex", replace force
 
 tex \begin{tabular}{lccccc}
 tex \hline \hline
-tex & \multicolumn{4}{c}{Number of publications} & \multicolumn{1}{c}{Number of}
+tex & \multicolumn{4}{c}{Number of publications} & \multicolumn{1}{c}{}
 tex & \cmidrule(lr){2-5} 
-tex & All & First-authored & Last-authored & Top & citations \\
+tex & (1)  & (2)  & (3)  & (4)  & (5) \\
+tex & All & First-authored & Last-authored & Top & Citations \\
 tex \hline
 tex & & & & & \\
 tex `tex_te' \\
@@ -794,9 +795,10 @@ texdoc init "$table_path/Tab_pub_poisson2.tex", replace force
 
 tex \begin{tabular}{lccccc}
 tex \hline \hline
-tex & \multicolumn{4}{c}{Number of publications} & \multicolumn{1}{c}{Number of}
+tex & \multicolumn{4}{c}{Number of publications} & \multicolumn{1}{c}{}
 tex & \cmidrule(lr){2-5} 
-tex & All & First-authored & Last-authored & Top & citations \\
+tex & (1)  & (2)  & (3)  & (4)  & (5) \\
+tex & All & First-authored & Last-authored & Top & Citations \\
 tex \hline
 tex & & & & & \\
 tex `tex_te' \\
